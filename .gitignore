@@ -1,4 +1,3 @@
-
 # Python
 __pycache__/
 *.py[cod]
@@ -30,16 +29,15 @@ Thumbs.db
 *.db-wal
 *.db-shm
 
-# Dataset
-data/raw/
-data/test/
-data/glasses/
-data/v3_train/
-data/sessions/
+# Dataset - không đưa dữ liệu ảnh lên GitHub
+data/
 
 # Trained models
 models/*.keras
 models/*.h5
+
+# Giữ lại mô hình CNN V3 đang sử dụng
+!models/eye_cnn_v3.keras
 
 # Backups
 backup/
