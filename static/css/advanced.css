@@ -386,3 +386,35 @@ th {
   display: grid;
   place-items: center;
 }
+
+/* DELETE EVIDENCE BUTTON */
+
+.evidence-item {
+  position: relative;
+}
+
+.evidence-delete-btn {
+  display: block;
+  width: calc(100% - 16px);
+  margin: 8px;
+  padding: 9px 12px;
+
+  border: 1px solid rgba(251, 113, 133, 0.35);
+  border-radius: 8px;
+
+  background: rgba(251, 113, 133, 0.12);
+  color: #fb7185;
+
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.evidence-delete-btn:hover {
+  background: rgba(251, 113, 133, 0.22);
+}
+
+.evidence-delete-btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}

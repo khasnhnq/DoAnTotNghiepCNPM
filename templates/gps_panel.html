@@ -1,0 +1,54 @@
+<section class="gps-card" id="gpsPanel">
+  <div class="gps-card-header">
+    <div>
+      <h2>Định vị GPS theo sự kiện</h2>
+      <p>Chỉ lưu tọa độ gắn với cảnh báo; không lưu hành trình liên tục.</p>
+    </div>
+    <span class="gps-state" id="gpsState">GPS đang tắt</span>
+  </div>
+
+  <div class="gps-actions">
+    <button type="button" class="gps-btn gps-btn-primary" id="gpsStartBtn">Bật GPS</button>
+    <button type="button" class="gps-btn gps-btn-muted" id="gpsStopBtn" disabled>Dừng GPS</button>
+    <button type="button" class="gps-btn gps-btn-muted" id="gpsRefreshBtn">Làm mới vị trí</button>
+  </div>
+
+  <div class="gps-info" aria-live="polite">
+    <div><span>Vĩ độ (Latitude)</span><strong id="gpsLat">--</strong></div>
+    <div><span>Kinh độ (Longitude)</span><strong id="gpsLon">--</strong></div>
+    <div><span>Độ chính xác</span><strong id="gpsAccuracy">--</strong></div>
+    <div><span>Cập nhật gần nhất</span><strong id="gpsUpdated">--</strong></div>
+  </div>
+
+  <div class="gps-map-block">
+    <div class="gps-map-heading">
+      <div>
+        <h3>Bản đồ vị trí và cảnh báo</h3>
+        <p>Vị trí hiện tại được đánh dấu màu xanh; vị trí cảnh báo màu đỏ.</p>
+      </div>
+      <button type="button" class="gps-text-btn" id="gpsZoomCurrentBtn" disabled>Về vị trí hiện tại</button>
+    </div>
+    <div id="gpsMap" role="application" aria-label="Bản đồ vị trí GPS"></div>
+    <p class="gps-map-caption">Bản đồ sử dụng OpenStreetMap. Cần kết nối Internet để tải bản đồ.</p>
+  </div>
+
+  <a id="gpsMapLink" class="gps-map-link" href="#" target="_blank" rel="noopener" hidden>
+    Mở vị trí hiện tại trên OpenStreetMap ở tab mới
+  </a>
+
+  <div class="gps-events-block">
+    <div class="gps-events-heading">
+      <h3>Vị trí tại các cảnh báo đã ghi nhận</h3>
+      <button type="button" class="gps-text-btn" id="gpsEventsRefreshBtn">Tải lại</button>
+    </div>
+    <div class="gps-events-list" id="gpsEventsList">
+      <p class="gps-empty">Chưa có cảnh báo nào được lưu kèm tọa độ GPS.</p>
+    </div>
+  </div>
+
+  <p class="gps-note">
+    GPS lấy vị trí của thiết bị đang mở trình duyệt. Cần cho phép quyền vị trí.
+    Nếu máy tính không có GPS, vị trí có thể được ước lượng qua Wi-Fi/hệ điều hành.
+    Tọa độ chỉ được lưu vào bản ghi cảnh báo khi dữ liệu vị trí còn mới (tối đa 2 phút).
+  </p>
+</section>

@@ -1,252 +1,572 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DriveGuard AI | Giám sát nâng cao</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/advanced.css') }}">
-</head>
-<body>
-  <div class="advanced-shell">
-    <header class="advanced-header">
-      <div>
-        <a class="back-link" href="/">← Quay lại Dashboard</a>
-        <h1>Giám sát nâng cao</h1>
-        <p>Phiên giám sát · Cấp độ cảnh báo · Hiệu suất AI · Hiệu chỉnh tài xế · Ảnh minh chứng</p>
-      </div>
-      <div class="header-status"><span class="pulse-dot"></span><span id="systemText">Đang kết nối API</span></div>
-    </header>
-
-    <section class="advanced-grid top-grid">
-      <article class="feature-card camera-card">
-        <div class="card-heading"><div><h2>Camera trực tiếp</h2><p>Phiên mới tự động bắt đầu khi bật luồng webcam</p></div><span class="pill" id="cameraPill">STANDBY</span></div>
-        <div class="preview-frame">
-          <div class="preview-placeholder" id="previewPlaceholder">Camera đang tắt</div>
-          <img id="advancedCamera" alt="Camera giám sát trực tiếp">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DriveGuard AI | Giám sát nâng cao</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/advanced.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/gps.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+  </head>
+  <body>
+    <div class="advanced-shell">
+      <header class="advanced-header">
+        <div>
+          <a class="back-link" href="/">← Quay lại Dashboard</a>
+          <h1>Giám sát nâng cao</h1>
+          <p>
+            Phiên giám sát · Cấp độ cảnh báo · Hiệu suất AI · Hiệu chỉnh tài xế
+            · Ảnh minh chứng
+          </p>
         </div>
-        <div class="button-row">
-          <button class="primary-btn" id="startCameraBtn">Bật camera</button>
-          <button class="danger-btn" id="stopCameraBtn" disabled>Tắt camera</button>
+        <div class="header-status">
+          <span class="pulse-dot"></span
+          ><span id="systemText">Đang kết nối API</span>
         </div>
-      </article>
+      </header>
 
-      <article class="feature-card">
-        <div class="card-heading"><div><h2>Hồ sơ tài xế</h2><p>Cấu hình được lưu riêng theo từng hồ sơ</p></div></div>
-        <label for="driverSelect">Tài xế đang chọn</label>
-        <div class="input-row"><select id="driverSelect"></select><button class="secondary-btn" id="setDriverBtn">Áp dụng</button></div>
-        <div class="input-row create-row"><input id="newDriverName" maxlength="60" placeholder="Tên tài xế mới"><button class="secondary-btn" id="createDriverBtn">Thêm hồ sơ</button></div>
-        <div class="config-values" id="driverConfig">Đang tải thông số…</div>
-        <div class="calibration-box">
-          <strong>Hiệu chỉnh EAR tự động</strong>
-          <p>Chỉ bật khi tài xế đang ngồi đúng vị trí, mắt mở và nhìn thẳng camera.</p>
-          <button class="secondary-btn" id="calibrateBtn" disabled>Bắt đầu hiệu chỉnh 5 giây</button>
-          <div class="calibration-progress"><div id="calibrationBar"></div></div>
-          <small id="calibrationText">Cần bật camera trước khi hiệu chỉnh.</small>
-        </div>
-      </article>
-    </section>
+      <section class="advanced-grid top-grid">
+        <article class="feature-card camera-card">
+          <div class="card-heading">
+            <div>
+              <h2>Camera trực tiếp</h2>
+              <p>Phiên mới tự động bắt đầu khi bật luồng webcam</p>
+            </div>
+            <span class="pill" id="cameraPill">STANDBY</span>
+          </div>
+          <div class="preview-frame">
+            <div class="preview-placeholder" id="previewPlaceholder">
+              Camera đang tắt
+            </div>
+            <img id="advancedCamera" alt="Camera giám sát trực tiếp" />
+          </div>
+          <div class="button-row">
+            <button class="primary-btn" id="startCameraBtn">Bật camera</button>
+            <button class="danger-btn" id="stopCameraBtn" disabled>
+              Tắt camera
+            </button>
+          </div>
+        </article>
 
-    <section class="advanced-grid metrics-grid">
-      <article class="metric-card"><span>Trạng thái tài xế</span><strong id="driverStatus">Đang chờ</strong><small id="warningLevel">Chưa có cảnh báo</small></article>
-      <article class="metric-card"><span>FPS</span><strong id="fpsValue">--</strong><small>Khung hình / giây</small></article>
-      <article class="metric-card"><span>Thời gian xử lý</span><strong id="processValue">-- ms</strong><small>Toàn bộ một khung hình</small></article>
-      <article class="metric-card"><span>Thời gian CNN</span><strong id="inferenceValue">-- ms</strong><small>Lần suy luận CNN gần nhất</small></article>
-      <article class="metric-card"><span>Xác suất mắt mở</span><strong id="cnnValue">--</strong><small id="cnnThresholdText">Ngưỡng CNN hiện tại</small></article>
-      <article class="metric-card"><span>EAR / MAR</span><strong id="earMarValue">-- / --</strong><small id="thresholdText">Ngưỡng theo hồ sơ</small></article>
-    </section>
+        <article class="feature-card">
+          <div class="card-heading">
+            <div>
+              <h2>Hồ sơ tài xế</h2>
+              <p>Cấu hình được lưu riêng theo từng hồ sơ</p>
+            </div>
+          </div>
+          <label for="driverSelect">Tài xế đang chọn</label>
+          <div class="input-row">
+            <select id="driverSelect"></select
+            ><button class="secondary-btn" id="setDriverBtn">Áp dụng</button>
+          </div>
+          <div class="input-row create-row">
+            <input
+              id="newDriverName"
+              maxlength="60"
+              placeholder="Tên tài xế mới"
+            /><button class="secondary-btn" id="createDriverBtn">
+              Thêm hồ sơ
+            </button>
+          </div>
+          <div class="config-values" id="driverConfig">Đang tải thông số…</div>
+          <div class="calibration-box">
+            <strong>Hiệu chỉnh EAR tự động</strong>
+            <p>
+              Chỉ bật khi tài xế đang ngồi đúng vị trí, mắt mở và nhìn thẳng
+              camera.
+            </p>
+            <button class="secondary-btn" id="calibrateBtn" disabled>
+              Bắt đầu hiệu chỉnh 5 giây
+            </button>
+            <div class="calibration-progress">
+              <div id="calibrationBar"></div>
+            </div>
+            <small id="calibrationText"
+              >Cần bật camera trước khi hiệu chỉnh.</small
+            >
+          </div>
+        </article>
+      </section>
 
-    <section class="advanced-grid lower-grid">
-      <article class="feature-card session-card">
-        <div class="card-heading"><div><h2>Phiên giám sát</h2><p>Phiên được chốt khi tắt camera hoặc luồng webcam kết thúc</p></div><span class="pill" id="sessionPill">Chưa có phiên</span></div>
-        <div class="session-summary" id="activeSessionSummary">Chưa có phiên giám sát đang hoạt động.</div>
-        <div class="table-wrap"><table><thead><tr><th>Phiên</th><th>Tài xế</th><th>Bắt đầu</th><th>Thời lượng</th><th>Cảnh báo</th><th>Báo cáo</th></tr></thead><tbody id="sessionsBody"><tr><td colspan="6">Đang tải…</td></tr></tbody></table></div>
-      </article>
-      <article class="feature-card evidence-card">
-        <div class="card-heading"><div><h2>Ảnh minh chứng</h2><p>Ảnh chụp tại thời điểm phát sinh cảnh báo, không lưu video liên tục</p></div><button class="secondary-btn" id="refreshEvidenceBtn">Làm mới</button></div>
-        <div class="evidence-grid" id="evidenceGrid"><p>Chưa có ảnh minh chứng.</p></div>
-      </article>
-    </section>
-    <p class="privacy-note">Lưu ý quyền riêng tư: ảnh minh chứng có thể chứa hình ảnh khuôn mặt. Chỉ bật chức năng giám sát khi người được ghi hình biết và đồng ý. Ảnh được lưu cục bộ trong static/evidence/ và không nên đưa lên GitHub.</p>
-  </div>
-  <div class="toast" id="advancedToast" role="status" aria-live="polite"></div>
+      <section class="advanced-grid metrics-grid">
+        <article class="metric-card">
+          <span>Trạng thái tài xế</span
+          ><strong id="driverStatus">Đang chờ</strong
+          ><small id="warningLevel">Chưa có cảnh báo</small>
+        </article>
+        <article class="metric-card">
+          <span>FPS</span><strong id="fpsValue">--</strong
+          ><small>Khung hình / giây</small>
+        </article>
+        <article class="metric-card">
+          <span>Thời gian xử lý</span><strong id="processValue">-- ms</strong
+          ><small>Toàn bộ một khung hình</small>
+        </article>
+        <article class="metric-card">
+          <span>Thời gian CNN</span><strong id="inferenceValue">-- ms</strong
+          ><small>Lần suy luận CNN gần nhất</small>
+        </article>
+        <article class="metric-card">
+          <span>Xác suất mắt mở</span><strong id="cnnValue">--</strong
+          ><small id="cnnThresholdText">Ngưỡng CNN hiện tại</small>
+        </article>
+        <article class="metric-card">
+          <span>EAR / MAR</span><strong id="earMarValue">-- / --</strong
+          ><small id="thresholdText">Ngưỡng theo hồ sơ</small>
+        </article>
+      </section>
 
-<script>
-const $ = (id) => document.getElementById(id);
-let selectedProfile = null;
-let statusTimer = null;
-let evidenceTimer = null;
-let cameraStartedHere = false;
-let lastCalibrationResultKey = "";
+      <section class="advanced-grid lower-grid">
+        <article class="feature-card session-card">
+          <div class="card-heading">
+            <div>
+              <h2>Phiên giám sát</h2>
+              <p>Phiên được chốt khi tắt camera hoặc luồng webcam kết thúc</p>
+            </div>
+            <span class="pill" id="sessionPill">Chưa có phiên</span>
+          </div>
+          <div class="session-summary" id="activeSessionSummary">
+            Chưa có phiên giám sát đang hoạt động.
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Phiên</th>
+                  <th>Tài xế</th>
+                  <th>Bắt đầu</th>
+                  <th>Thời lượng</th>
+                  <th>Cảnh báo</th>
+                  <th>Báo cáo</th>
+                </tr>
+              </thead>
+              <tbody id="sessionsBody">
+                <tr>
+                  <td colspan="6">Đang tải…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+        <article class="feature-card evidence-card">
+          <div class="card-heading">
+            <div>
+              <h2>Ảnh minh chứng</h2>
+              <p>
+                Ảnh chụp tại thời điểm phát sinh cảnh báo, không lưu video liên
+                tục
+              </p>
+            </div>
+            <button class="secondary-btn" id="refreshEvidenceBtn">
+              Làm mới
+            </button>
+          </div>
+          <div class="evidence-grid" id="evidenceGrid">
+            <p>Chưa có ảnh minh chứng.</p>
+          </div>
+        </article>
+      </section>
+      <p class="privacy-note">
+        Lưu ý quyền riêng tư: ảnh minh chứng có thể chứa hình ảnh khuôn mặt. Chỉ
+        bật chức năng giám sát khi người được ghi hình biết và đồng ý. Ảnh được
+        lưu cục bộ trong static/evidence/ và không nên đưa lên GitHub.
+      </p>
+    </div>
+    <div
+      class="toast"
+      id="advancedToast"
+      role="status"
+      aria-live="polite"
+    ></div>
 
-async function api(url, options = {}) {
-  const response = await fetch(url, {
-    headers: {"Content-Type": "application/json", ...(options.headers || {})},
-    ...options
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.message || data.error || `HTTP ${response.status}`);
-  return data;
-}
-function toast(message) {
-  const el = $("advancedToast");
-  el.textContent = message;
-  el.classList.add("show");
-  clearTimeout(toast.timer);
-  toast.timer = setTimeout(() => el.classList.remove("show"), 3500);
-}
-function fmtTime(value) {
-  if (!value) return "--";
-  const d = new Date(String(value).replace(" ", "T"));
-  return Number.isNaN(d.getTime()) ? value : d.toLocaleString("vi-VN");
-}
-function duration(value) {
-  const seconds = Math.max(0, Math.round(Number(value || 0)));
-  const h = Math.floor(seconds / 3600), m = Math.floor((seconds % 3600) / 60), s = seconds % 60;
-  return h ? `${h} giờ ${m} phút` : m ? `${m} phút ${s} giây` : `${s} giây`;
-}
-function levelText(status, level) {
-  if (status === "DROWSY") return level >= 3 ? "MỨC 3 · NGUY HIỂM" : "MỨC 2 · CẢNH BÁO";
-  if (status === "YAWNING") return "MỨC 1 · CHÚ Ý";
-  if (status === "NO_FACE") return "MỨC 2 · KHÔNG THẤY KHUÔN MẶT";
-  return "Không có cảnh báo";
-}
-async function loadDrivers() {
-  const data = await api("/api/features/drivers");
-  const select = $("driverSelect");
-  select.replaceChildren();
-  data.drivers.forEach(driver => {
-    const option = document.createElement("option");
-    option.value = driver.id;
-    option.textContent = driver.name;
-    option.selected = driver.is_active;
-    select.appendChild(option);
-    if (driver.is_active) showDriver(driver);
-  });
-}
-function showDriver(driver) {
-  selectedProfile = driver;
-  $("driverConfig").textContent = `EAR ${Number(driver.ear_threshold).toFixed(3)} · Ngủ gật ${driver.drowsy_seconds}s · MAR ${Number(driver.mar_threshold).toFixed(2)} · Ngáp ${driver.yawn_seconds}s`;
-}
-async function setDriver() {
-  const driverId = Number($("driverSelect").value);
-  const data = await api("/api/features/drivers/active", {method:"POST", body:JSON.stringify({driver_id:driverId})});
-  showDriver(data.driver);
-  toast("Đã áp dụng hồ sơ tài xế. Bật lại camera để dùng cấu hình này.");
-}
-async function createDriver() {
-  const name = $("newDriverName").value.trim();
-  const data = await api("/api/features/drivers", {method:"POST", body:JSON.stringify({name})});
-  $("newDriverName").value = "";
-  await loadDrivers();
-  $("driverSelect").value = data.driver.id;
-  await setDriver();
-  toast("Đã tạo hồ sơ tài xế.");
-}
-async function startCamera() {
-  const img = $("advancedCamera");
-  $("startCameraBtn").disabled = true;
-  $("previewPlaceholder").textContent = "Đang kết nối webcam…";
-  img.onload = () => { $("previewPlaceholder").style.display = "none"; img.style.display = "block"; };
-  img.onerror = () => { img.style.display = "none"; $("previewPlaceholder").style.display = "grid"; $("previewPlaceholder").textContent = "Không thể mở webcam"; $("startCameraBtn").disabled = false; toast("Không mở được camera. Kiểm tra quyền truy cập webcam."); };
-  img.src = "/video_feed?advanced=" + Date.now();
-  cameraStartedHere = true;
-  setTimeout(loadStatus, 700);
-}
-async function stopCamera() {
-  $("stopCameraBtn").disabled = true;
-  try { await api("/api/camera/stop", {method:"POST"}); }
-  catch (error) { toast("Không xác nhận được thao tác tắt camera: " + error.message); }
-  const img = $("advancedCamera"); img.onload = null; img.onerror = null; img.removeAttribute("src"); img.style.display = "none";
-  $("previewPlaceholder").style.display = "grid"; $("previewPlaceholder").textContent = "Camera đã tắt";
-  $("startCameraBtn").disabled = false; cameraStartedHere = false;
-  await loadStatus(); await loadSessions(); toast("Đã gửi yêu cầu tắt camera.");
-}
-async function loadStatus() {
-  try {
-    const d = await api("/api/features/status");
-    $("systemText").textContent = "API đang hoạt động";
-    $("cameraPill").textContent = d.camera_on ? "ĐANG GIÁM SÁT" : "STANDBY";
-    $("driverStatus").textContent = ({NORMAL:"Bình thường",DROWSY:"Buồn ngủ",YAWNING:"Đang ngáp",NO_FACE:"Không thấy khuôn mặt",EYES_CLOSED:"Mắt đang nhắm",EYES_NOT_DETECTED:"Không đọc được mắt",STANDBY:"Chờ camera"})[d.status] || d.status || "--";
-    $("warningLevel").textContent = levelText(d.status, Number(d.warning_level || 0));
-    $("fpsValue").textContent = Number(d.fps || 0).toFixed(1);
-    $("processValue").textContent = Number(d.process_ms || 0).toFixed(1) + " ms";
-    $("inferenceValue").textContent = Number(d.inference_ms || 0).toFixed(1) + " ms";
-    $("cnnValue").textContent = d.cnn_open_probability == null ? "--" : Number(d.cnn_open_probability).toFixed(4);
-    $("cnnThresholdText").textContent = "Ngưỡng CNN: " + Number(d.cnn_threshold || 0.052847).toFixed(6);
-    $("earMarValue").textContent = (d.ear == null ? "--" : Number(d.ear).toFixed(3)) + " / " + (d.mar == null ? "--" : Number(d.mar).toFixed(3));
-    $("thresholdText").textContent = `EAR ${Number(d.ear_threshold || 0).toFixed(3)} · MAR ${Number(d.mar_threshold || 0).toFixed(2)}`;
-    $("startCameraBtn").disabled = !!d.camera_on;
-    $("stopCameraBtn").disabled = !d.camera_on;
-    $("calibrateBtn").disabled = !d.camera_on || !!d.calibration?.active;
-    if (d.session_id) {
-      $("sessionPill").textContent = "Đang hoạt động · #" + d.session_id;
-      $("activeSessionSummary").textContent = `Phiên #${d.session_id} · Tài xế: ${d.driver || "--"} · Camera đang giám sát.`;
-    } else {
-      $("sessionPill").textContent = "Chưa có phiên";
-      $("activeSessionSummary").textContent = "Chưa có phiên giám sát đang hoạt động.";
-    }
-    if (d.calibration?.active) {
-      const left = Number(d.calibration.seconds_left || 0);
-      $("calibrationBar").style.width = `${Math.max(0, Math.min(100, ((5-left)/5)*100))}%`;
-      $("calibrationText").textContent = `Đang thu thập mẫu mắt mở: ${d.calibration.sample_count} mẫu · còn ${left.toFixed(1)} giây. Hãy nhìn thẳng và giữ mắt mở.`;
-    } else {
-      $("calibrationBar").style.width = "0%";
-      const result = d.calibration?.result;
-      $("calibrationText").textContent = result ? result.message + (result.success ? ` EAR mới: ${result.ear_threshold}` : "") : "Cần bật camera trước khi hiệu chỉnh.";
-      const resultKey = result ? JSON.stringify(result) : "";
-      if (result?.success && selectedProfile && resultKey !== lastCalibrationResultKey) {
-        lastCalibrationResultKey = resultKey;
-        await loadDrivers();
+    <script>
+      const $ = (id) => document.getElementById(id);
+      let selectedProfile = null;
+      let statusTimer = null;
+      let evidenceTimer = null;
+      let cameraStartedHere = false;
+      let lastCalibrationResultKey = "";
+
+      async function api(url, options = {}) {
+        const response = await fetch(url, {
+          headers: {
+            "Content-Type": "application/json",
+            ...(options.headers || {}),
+          },
+          ...options,
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok)
+          throw new Error(
+            data.message || data.error || `HTTP ${response.status}`
+          );
+        return data;
       }
-    }
-  } catch (error) {
-    $("systemText").textContent = "Không kết nối được API";
-  }
-}
-async function startCalibration() {
-  const data = await api("/api/features/calibration/start", {method:"POST", body:"{}"});
-  toast(data.message);
-  await loadStatus();
-}
-async function loadSessions() {
-  try {
-    const data = await api("/api/features/sessions?limit=20");
-    const body = $("sessionsBody"); body.replaceChildren();
-    if (!data.sessions.length) { body.innerHTML = '<tr><td colspan="6">Chưa có phiên nào.</td></tr>'; return; }
-    data.sessions.forEach(s => {
-      const tr = document.createElement("tr");
-      const cols = ["#"+s.id, s.driver_name || "--", fmtTime(s.started_at), duration(s.duration_seconds), `${s.total_alerts || 0} (ngủ ${s.drowsy_count || 0}, ngáp ${s.yawning_count || 0})`];
-      cols.forEach(value => { const td = document.createElement("td"); td.textContent = value; tr.appendChild(td); });
-      const td = document.createElement("td"); const a = document.createElement("a"); a.className = "report-link"; a.href = `/sessions/${s.id}/report`; a.target = "_blank"; a.textContent = "Xem báo cáo"; td.appendChild(a); tr.appendChild(td); body.appendChild(tr);
-    });
-  } catch (error) { toast("Không tải được danh sách phiên: " + error.message); }
-}
-async function loadEvidence() {
-  try {
-    const data = await api("/api/features/evidence?limit=12");
-    const grid = $("evidenceGrid"); grid.replaceChildren();
-    if (!data.evidence.length) { const p = document.createElement("p"); p.textContent = "Chưa có ảnh minh chứng."; grid.appendChild(p); return; }
-    data.evidence.forEach(e => {
-      const figure = document.createElement("figure");
-      const img = document.createElement("img"); img.loading = "lazy"; img.src = `/api/features/evidence/${e.id}/image`; img.alt = "Ảnh minh chứng cảnh báo";
-      const cap = document.createElement("figcaption"); cap.textContent = `${e.event_type} · mức ${e.severity} · ${fmtTime(e.created_at)}`;
-      figure.append(img, cap); grid.appendChild(figure);
-    });
-  } catch (error) { toast("Không tải được ảnh minh chứng: " + error.message); }
-}
-$("startCameraBtn").addEventListener("click", startCamera);
-$("stopCameraBtn").addEventListener("click", stopCamera);
-$("setDriverBtn").addEventListener("click", () => setDriver().catch(e => toast(e.message)));
-$("createDriverBtn").addEventListener("click", () => createDriver().catch(e => toast(e.message)));
-$("calibrateBtn").addEventListener("click", () => startCalibration().catch(e => toast(e.message)));
-$("refreshEvidenceBtn").addEventListener("click", loadEvidence);
-loadDrivers().catch(e => toast(e.message));
-loadStatus(); loadSessions(); loadEvidence();
-statusTimer = setInterval(loadStatus, 700);
-evidenceTimer = setInterval(loadEvidence, 10000);
-setInterval(loadSessions, 5000);
-window.addEventListener("beforeunload", () => { clearInterval(statusTimer); clearInterval(evidenceTimer); });
-</script>
-</body>
+      function toast(message) {
+        const el = $("advancedToast");
+        el.textContent = message;
+        el.classList.add("show");
+        clearTimeout(toast.timer);
+        toast.timer = setTimeout(() => el.classList.remove("show"), 3500);
+      }
+      function fmtTime(value) {
+        if (!value) return "--";
+        const d = new Date(String(value).replace(" ", "T"));
+        return Number.isNaN(d.getTime()) ? value : d.toLocaleString("vi-VN");
+      }
+      function duration(value) {
+        const seconds = Math.max(0, Math.round(Number(value || 0)));
+        const h = Math.floor(seconds / 3600),
+          m = Math.floor((seconds % 3600) / 60),
+          s = seconds % 60;
+        return h
+          ? `${h} giờ ${m} phút`
+          : m
+          ? `${m} phút ${s} giây`
+          : `${s} giây`;
+      }
+      function levelText(status, level) {
+        if (status === "DROWSY")
+          return level >= 3 ? "MỨC 3 · NGUY HIỂM" : "MỨC 2 · CẢNH BÁO";
+        if (status === "YAWNING") return "MỨC 1 · CHÚ Ý";
+        if (status === "NO_FACE") return "MỨC 2 · KHÔNG THẤY KHUÔN MẶT";
+        return "Không có cảnh báo";
+      }
+      async function loadDrivers() {
+        const data = await api("/api/features/drivers");
+        const select = $("driverSelect");
+        select.replaceChildren();
+        data.drivers.forEach((driver) => {
+          const option = document.createElement("option");
+          option.value = driver.id;
+          option.textContent = driver.name;
+          option.selected = driver.is_active;
+          select.appendChild(option);
+          if (driver.is_active) showDriver(driver);
+        });
+      }
+      function showDriver(driver) {
+        selectedProfile = driver;
+        $("driverConfig").textContent = `EAR ${Number(
+          driver.ear_threshold
+        ).toFixed(3)} · Ngủ gật ${driver.drowsy_seconds}s · MAR ${Number(
+          driver.mar_threshold
+        ).toFixed(2)} · Ngáp ${driver.yawn_seconds}s`;
+      }
+      async function setDriver() {
+        const driverId = Number($("driverSelect").value);
+        const data = await api("/api/features/drivers/active", {
+          method: "POST",
+          body: JSON.stringify({ driver_id: driverId }),
+        });
+        showDriver(data.driver);
+        toast("Đã áp dụng hồ sơ tài xế. Bật lại camera để dùng cấu hình này.");
+      }
+      async function createDriver() {
+        const name = $("newDriverName").value.trim();
+        const data = await api("/api/features/drivers", {
+          method: "POST",
+          body: JSON.stringify({ name }),
+        });
+        $("newDriverName").value = "";
+        await loadDrivers();
+        $("driverSelect").value = data.driver.id;
+        await setDriver();
+        toast("Đã tạo hồ sơ tài xế.");
+      }
+      async function startCamera() {
+        const img = $("advancedCamera");
+        $("startCameraBtn").disabled = true;
+        $("previewPlaceholder").textContent = "Đang kết nối webcam…";
+        img.onload = () => {
+          $("previewPlaceholder").style.display = "none";
+          img.style.display = "block";
+        };
+        img.onerror = () => {
+          img.style.display = "none";
+          $("previewPlaceholder").style.display = "grid";
+          $("previewPlaceholder").textContent = "Không thể mở webcam";
+          $("startCameraBtn").disabled = false;
+          toast("Không mở được camera. Kiểm tra quyền truy cập webcam.");
+        };
+        img.src = "/video_feed?advanced=" + Date.now();
+        cameraStartedHere = true;
+        setTimeout(loadStatus, 700);
+      }
+      async function stopCamera() {
+        $("stopCameraBtn").disabled = true;
+        try {
+          await api("/api/camera/stop", { method: "POST" });
+        } catch (error) {
+          toast("Không xác nhận được thao tác tắt camera: " + error.message);
+        }
+        const img = $("advancedCamera");
+        img.onload = null;
+        img.onerror = null;
+        img.removeAttribute("src");
+        img.style.display = "none";
+        $("previewPlaceholder").style.display = "grid";
+        $("previewPlaceholder").textContent = "Camera đã tắt";
+        $("startCameraBtn").disabled = false;
+        cameraStartedHere = false;
+        await loadStatus();
+        await loadSessions();
+        toast("Đã gửi yêu cầu tắt camera.");
+      }
+      async function loadStatus() {
+        try {
+          const d = await api("/api/features/status");
+          $("systemText").textContent = "API đang hoạt động";
+          $("cameraPill").textContent = d.camera_on
+            ? "ĐANG GIÁM SÁT"
+            : "STANDBY";
+          $("driverStatus").textContent =
+            {
+              NORMAL: "Bình thường",
+              DROWSY: "Buồn ngủ",
+              YAWNING: "Đang ngáp",
+              NO_FACE: "Không thấy khuôn mặt",
+              EYES_CLOSED: "Mắt đang nhắm",
+              EYES_NOT_DETECTED: "Không đọc được mắt",
+              STANDBY: "Chờ camera",
+            }[d.status] ||
+            d.status ||
+            "--";
+          $("warningLevel").textContent = levelText(
+            d.status,
+            Number(d.warning_level || 0)
+          );
+          $("fpsValue").textContent = Number(d.fps || 0).toFixed(1);
+          $("processValue").textContent =
+            Number(d.process_ms || 0).toFixed(1) + " ms";
+          $("inferenceValue").textContent =
+            Number(d.inference_ms || 0).toFixed(1) + " ms";
+          $("cnnValue").textContent =
+            d.cnn_open_probability == null
+              ? "--"
+              : Number(d.cnn_open_probability).toFixed(4);
+          $("cnnThresholdText").textContent =
+            "Ngưỡng CNN: " + Number(d.cnn_threshold || 0.052847).toFixed(6);
+          $("earMarValue").textContent =
+            (d.ear == null ? "--" : Number(d.ear).toFixed(3)) +
+            " / " +
+            (d.mar == null ? "--" : Number(d.mar).toFixed(3));
+          $("thresholdText").textContent = `EAR ${Number(
+            d.ear_threshold || 0
+          ).toFixed(3)} · MAR ${Number(d.mar_threshold || 0).toFixed(2)}`;
+          $("startCameraBtn").disabled = !!d.camera_on;
+          $("stopCameraBtn").disabled = !d.camera_on;
+          $("calibrateBtn").disabled = !d.camera_on || !!d.calibration?.active;
+          if (d.session_id) {
+            $("sessionPill").textContent = "Đang hoạt động · #" + d.session_id;
+            $("activeSessionSummary").textContent = `Phiên #${
+              d.session_id
+            } · Tài xế: ${d.driver || "--"} · Camera đang giám sát.`;
+          } else {
+            $("sessionPill").textContent = "Chưa có phiên";
+            $("activeSessionSummary").textContent =
+              "Chưa có phiên giám sát đang hoạt động.";
+          }
+          if (d.calibration?.active) {
+            const left = Number(d.calibration.seconds_left || 0);
+            $("calibrationBar").style.width = `${Math.max(
+              0,
+              Math.min(100, ((5 - left) / 5) * 100)
+            )}%`;
+            $("calibrationText").textContent = `Đang thu thập mẫu mắt mở: ${
+              d.calibration.sample_count
+            } mẫu · còn ${left.toFixed(1)} giây. Hãy nhìn thẳng và giữ mắt mở.`;
+          } else {
+            $("calibrationBar").style.width = "0%";
+            const result = d.calibration?.result;
+            $("calibrationText").textContent = result
+              ? result.message +
+                (result.success ? ` EAR mới: ${result.ear_threshold}` : "")
+              : "Cần bật camera trước khi hiệu chỉnh.";
+            const resultKey = result ? JSON.stringify(result) : "";
+            if (
+              result?.success &&
+              selectedProfile &&
+              resultKey !== lastCalibrationResultKey
+            ) {
+              lastCalibrationResultKey = resultKey;
+              await loadDrivers();
+            }
+          }
+        } catch (error) {
+          $("systemText").textContent = "Không kết nối được API";
+        }
+      }
+      async function startCalibration() {
+        const data = await api("/api/features/calibration/start", {
+          method: "POST",
+          body: "{}",
+        });
+        toast(data.message);
+        await loadStatus();
+      }
+      async function loadSessions() {
+        try {
+          const data = await api("/api/features/sessions?limit=20");
+          const body = $("sessionsBody");
+          body.replaceChildren();
+          if (!data.sessions.length) {
+            body.innerHTML = '<tr><td colspan="6">Chưa có phiên nào.</td></tr>';
+            return;
+          }
+          data.sessions.forEach((s) => {
+            const tr = document.createElement("tr");
+            const cols = [
+              "#" + s.id,
+              s.driver_name || "--",
+              fmtTime(s.started_at),
+              duration(s.duration_seconds),
+              `${s.total_alerts || 0} (ngủ ${s.drowsy_count || 0}, ngáp ${
+                s.yawning_count || 0
+              })`,
+            ];
+            cols.forEach((value) => {
+              const td = document.createElement("td");
+              td.textContent = value;
+              tr.appendChild(td);
+            });
+            const td = document.createElement("td");
+            const a = document.createElement("a");
+            a.className = "report-link";
+            a.href = `/sessions/${s.id}/report`;
+            a.target = "_blank";
+            a.textContent = "Xem báo cáo";
+            td.appendChild(a);
+            tr.appendChild(td);
+            body.appendChild(tr);
+          });
+        } catch (error) {
+          toast("Không tải được danh sách phiên: " + error.message);
+        }
+      }
+      async function loadEvidence() {
+        try {
+          const data = await api("/api/features/evidence?limit=12");
+          const grid = $("evidenceGrid");
+          grid.replaceChildren();
+          if (!data.evidence.length) {
+            const p = document.createElement("p");
+            p.textContent = "Chưa có ảnh minh chứng.";
+            grid.appendChild(p);
+            return;
+          }
+          data.evidence.forEach((e) => {
+            const figure = document.createElement("figure");
+            figure.classList.add("evidence-item");
+
+            const img = document.createElement("img");
+            img.loading = "lazy";
+            img.src = `/api/features/evidence/${e.id}/image`;
+            img.alt = "Ảnh minh chứng cảnh báo";
+
+            const cap = document.createElement("figcaption");
+            cap.textContent = `${e.event_type} · mức ${e.severity} · ${fmtTime(
+              e.created_at
+            )}`;
+
+            // Nut xoa anh
+            const deleteBtn = document.createElement("button");
+            deleteBtn.type = "button";
+            deleteBtn.className = "evidence-delete-btn";
+            deleteBtn.textContent = "Xóa ảnh";
+
+            deleteBtn.addEventListener("click", async () => {
+              if (
+                !confirm(
+                  "Bạn có chắc muốn xóa ảnh minh chứng này? Lịch sử cảnh báo vẫn được giữ."
+                )
+              ) {
+                return;
+              }
+
+              deleteBtn.disabled = true;
+
+              try {
+                const response = await fetch(
+                  `/api/features/evidence/${encodeURIComponent(e.id)}`,
+                  {
+                    method: "DELETE",
+                    headers: {
+                      Accept: "application/json",
+                    },
+                  }
+                );
+
+                const result = await response.json();
+
+                if (!response.ok || result.success !== true) {
+                  throw new Error(result.message || "Xóa ảnh thất bại");
+                }
+
+                toast(result.message || "Đã xóa ảnh minh chứng");
+
+                await loadEvidence();
+              } catch (error) {
+                toast("Không xóa được ảnh: " + error.message);
+                deleteBtn.disabled = false;
+              }
+            });
+
+            figure.append(img, cap, deleteBtn);
+            grid.appendChild(figure);
+          });
+        } catch (error) {
+          toast("Không tải được ảnh minh chứng: " + error.message);
+        }
+      }
+      $("startCameraBtn").addEventListener("click", startCamera);
+      $("stopCameraBtn").addEventListener("click", stopCamera);
+      $("setDriverBtn").addEventListener("click", () =>
+        setDriver().catch((e) => toast(e.message))
+      );
+      $("createDriverBtn").addEventListener("click", () =>
+        createDriver().catch((e) => toast(e.message))
+      );
+      $("calibrateBtn").addEventListener("click", () =>
+        startCalibration().catch((e) => toast(e.message))
+      );
+      $("refreshEvidenceBtn").addEventListener("click", loadEvidence);
+      loadDrivers().catch((e) => toast(e.message));
+      loadStatus();
+      loadSessions();
+      loadEvidence();
+      statusTimer = setInterval(loadStatus, 700);
+      evidenceTimer = setInterval(loadEvidence, 10000);
+      setInterval(loadSessions, 5000);
+      window.addEventListener("beforeunload", () => {
+        clearInterval(statusTimer);
+        clearInterval(evidenceTimer);
+      });
+    </script>
+    {% include "gps_panel.html" %}
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+
+    <script src="{{ url_for('static', filename='js/gps.js') }}"></script>
+  </body>
 </html>

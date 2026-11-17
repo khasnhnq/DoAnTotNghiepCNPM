@@ -2,6 +2,8 @@
 from flask import Flask, render_template, Response, jsonify, request
 from camera_stream import CameraStream
 from driveguard_features import install_camera_extensions, register_feature_routes
+from driveguard_gps import register_gps_routes
+from driveguard_evidence_delete import register_evidence_delete_route
 
 install_camera_extensions()
 import sqlite3
@@ -14,6 +16,8 @@ from datetime import date
 app = Flask(__name__)
 camera_stream = CameraStream()
 register_feature_routes(app, camera_stream)
+register_gps_routes(app)
+register_evidence_delete_route(app)
 
 
 @app.route("/video_feed")
