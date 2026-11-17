@@ -1,0 +1,388 @@
+:root {
+  --adv-bg: #080e1b;
+  --adv-card: #111c30;
+  --adv-border: rgba(148, 163, 184, 0.16);
+  --adv-text: #e8efff;
+  --adv-muted: #94a3b8;
+  --adv-cyan: #22d3ee;
+  --adv-green: #34d399;
+  --adv-red: #fb7185;
+}
+body {
+  background: radial-gradient(
+      ellipse at 14% 0%,
+      rgba(34, 211, 238, 0.08),
+      transparent 34%
+    ),
+    var(--adv-bg);
+  color: var(--adv-text);
+}
+.advanced-shell {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 28px;
+}
+.advanced-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.advanced-header h1 {
+  font-size: 28px;
+  margin: 10px 0 4px;
+}
+.advanced-header p,
+.card-heading p {
+  color: var(--adv-muted);
+  margin: 0;
+  font-size: 12px;
+}
+.back-link {
+  color: var(--adv-cyan);
+  font-size: 12px;
+}
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--adv-muted);
+  font-size: 12px;
+}
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--adv-green);
+  box-shadow: 0 0 12px var(--adv-green);
+}
+.advanced-grid {
+  display: grid;
+  gap: 16px;
+}
+.top-grid {
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.85fr);
+}
+.lower-grid {
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+  margin-top: 16px;
+}
+.metrics-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 16px;
+}
+.feature-card,
+.metric-card {
+  background: linear-gradient(
+    145deg,
+    rgba(17, 28, 48, 0.98),
+    rgba(12, 23, 41, 0.98)
+  );
+  border: 1px solid var(--adv-border);
+  border-radius: 16px;
+  padding: 18px;
+  min-width: 0;
+}
+.card-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.card-heading h2 {
+  font-size: 16px;
+  margin: 0 0 5px;
+}
+.pill {
+  white-space: nowrap;
+  border: 1px solid var(--adv-border);
+  border-radius: 30px;
+  padding: 5px 10px;
+  color: var(--adv-cyan);
+  font-size: 10px;
+  font-weight: 700;
+}
+.preview-frame {
+  height: 315px;
+  background: #050a12;
+  border: 1px solid var(--adv-border);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.preview-frame img {
+  display: none;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.preview-placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--adv-muted);
+  font-size: 13px;
+  text-align: center;
+}
+.button-row,
+.input-row {
+  display: flex;
+  gap: 9px;
+  margin-top: 13px;
+}
+.primary-btn,
+.danger-btn,
+.secondary-btn {
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 10px 13px;
+  color: #06111d;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+.primary-btn {
+  background: var(--adv-cyan);
+}
+.danger-btn {
+  background: var(--adv-red);
+}
+.secondary-btn {
+  background: rgba(34, 211, 238, 0.12);
+  color: var(--adv-cyan);
+  border-color: rgba(34, 211, 238, 0.22);
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+label {
+  display: block;
+  color: var(--adv-muted);
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+select,
+input {
+  min-width: 0;
+  flex: 1;
+  padding: 10px 11px;
+  border: 1px solid var(--adv-border);
+  border-radius: 9px;
+  background: #0b1425;
+  color: var(--adv-text);
+  outline: none;
+}
+.create-row {
+  margin-top: 9px;
+}
+.config-values {
+  font-size: 11px;
+  color: var(--adv-muted);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--adv-border);
+}
+.calibration-box {
+  background: rgba(34, 211, 238, 0.055);
+  border: 1px solid rgba(34, 211, 238, 0.14);
+  padding: 13px;
+  border-radius: 11px;
+  margin-top: 13px;
+}
+.calibration-box strong {
+  font-size: 12px;
+}
+.calibration-box p {
+  font-size: 11px;
+  color: var(--adv-muted);
+  margin: 5px 0 10px;
+}
+.calibration-progress {
+  height: 6px;
+  background: #07101e;
+  border-radius: 8px;
+  margin: 10px 0 6px;
+  overflow: hidden;
+}
+.calibration-progress div {
+  height: 100%;
+  width: 0;
+  background: var(--adv-cyan);
+  transition: width 0.2s;
+}
+.calibration-box small {
+  color: var(--adv-muted);
+  font-size: 10px;
+}
+.metric-card {
+  padding: 16px;
+}
+.metric-card span,
+.metric-card small {
+  display: block;
+  color: var(--adv-muted);
+  font-size: 11px;
+}
+.metric-card strong {
+  display: block;
+  font-size: 23px;
+  margin: 8px 0 3px;
+  overflow-wrap: anywhere;
+}
+.metric-card small {
+  font-size: 10px;
+}
+.session-summary {
+  font-size: 12px;
+  color: var(--adv-muted);
+  margin: 4px 0 12px;
+}
+.table-wrap {
+  overflow: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+th,
+td {
+  text-align: left;
+  padding: 11px 9px;
+  border-bottom: 1px solid var(--adv-border);
+  white-space: nowrap;
+}
+th {
+  color: var(--adv-muted);
+  font-weight: 600;
+}
+.report-link {
+  color: var(--adv-cyan);
+}
+.evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.evidence-grid figure {
+  margin: 0;
+  background: #081221;
+  border: 1px solid var(--adv-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.evidence-grid img {
+  display: block;
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+}
+.evidence-grid figcaption {
+  padding: 8px;
+  font-size: 9px;
+  color: var(--adv-muted);
+}
+.privacy-note {
+  max-width: 1000px;
+  color: var(--adv-muted);
+  font-size: 10px;
+  margin: 16px auto;
+}
+.toast {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  max-width: 360px;
+  background: #14243a;
+  border: 1px solid var(--adv-border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--adv-text);
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: 0.2s;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (max-width: 1000px) {
+  .top-grid,
+  .lower-grid {
+    grid-template-columns: 1fr;
+  }
+  .metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 620px) {
+  .advanced-shell {
+    padding: 16px;
+  }
+  .advanced-header {
+    display: block;
+  }
+  .header-status {
+    margin-top: 12px;
+  }
+  .metrics-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .preview-frame {
+    height: 230px;
+  }
+  .button-row,
+  .input-row {
+    flex-wrap: wrap;
+  }
+  .evidence-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* =========================================
+   CAMERA PREVIEW - DONG BO VOI DASHBOARD
+   Hien thi day du khung hinh 4:3
+========================================= */
+
+.preview-frame {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-width: 0;
+
+  /* Khong co dinh chieu cao 315px */
+  height: auto;
+  min-height: 280px;
+
+  overflow: hidden;
+  background: #050a12;
+  border-radius: 12px;
+}
+
+/* Hien thi anh giong cameraFeed cua Dashboard */
+.preview-frame img {
+  display: none;
+
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+
+  object-fit: contain;
+}
+
+/* Khung cho khi camera chua bat */
+.preview-placeholder {
+  width: 100%;
+  min-height: 280px;
+
+  display: grid;
+  place-items: center;
+}

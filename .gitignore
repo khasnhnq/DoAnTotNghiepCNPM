@@ -48,3 +48,7 @@ debug/
 # Generated Python files
 .pytest_cache/
 .mypy_cache/
+# DriveGuard feature backups
+.driveguard_feature_backups/
+# Alert evidence contains camera images
+static/evidence/

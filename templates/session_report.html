@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Báo cáo phiên #{{ session.id }} | DriveGuard AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    body{padding:28px}.report{max-width:1100px;margin:auto}.report-head{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:24px}.actions{display:flex;gap:10px;flex-wrap:wrap}.actions a,.actions button{padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);cursor:pointer}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:20px 0}.card{padding:18px;border:1px solid var(--border);border-radius:14px;background:var(--surface)}.card small{display:block;color:var(--muted)}.card strong{font-size:24px;display:block;margin-top:8px}.table-wrap{overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:14px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;border-bottom:1px solid var(--border);white-space:nowrap}th{color:var(--muted)}.severity{font-weight:700}.evidence{width:90px;height:64px;object-fit:cover;border-radius:8px}.empty{padding:20px;color:var(--muted)}@media(max-width:700px){.report-head{display:block}.cards{grid-template-columns:repeat(2,1fr)}}@media print{body{padding:0;background:#fff;color:#111}.card,.table-wrap{background:#fff;border-color:#ccc}th,td{border-color:#ddd}.actions{display:none}}
+  </style>
+</head>
+<body>
+<div class="report">
+  <div class="report-head"><div><a href="/advanced">← Quay lại giám sát nâng cao</a><h1>Báo cáo phiên giám sát #{{ session.id }}</h1><p>Tài xế: <strong>{{ session.driver_name or 'Không xác định' }}</strong></p></div><div class="actions"><a href="/api/features/sessions/{{ session.id }}/export.csv">Xuất CSV</a><button onclick="window.print()">In / Lưu PDF</button></div></div>
+  <div class="cards">
+    <div class="card"><small>Bắt đầu</small><strong style="font-size:16px">{{ session.started_at }}</strong></div>
+    <div class="card"><small>Kết thúc</small><strong style="font-size:16px">{{ session.ended_at or 'Đang hoạt động' }}</strong></div>
+    <div class="card"><small>Thời lượng (giây)</small><strong>{{ '%.0f'|format(session.duration_seconds or 0) }}</strong></div>
+    <div class="card"><small>Tổng cảnh báo</small><strong>{{ alerts|length }}</strong></div>
+  </div>
+  <h2>Chi tiết sự kiện</h2>
+  <div class="table-wrap"><table><thead><tr><th>ID</th><th>Sự kiện</th><th>Mức</th><th>EAR</th><th>MAR</th><th>Thời gian</th><th>Ảnh</th></tr></thead><tbody>
+  {% for item in alerts %}<tr><td>{{ item.id }}</td><td>{{ {'DROWSY':'Buồn ngủ','YAWNING':'Ngáp','FACE_AWAY':'Không phát hiện khuôn mặt'}.get(item.event_type, item.event_type) }}</td><td class="severity">{{ item.severity }}</td><td>{{ '%.3f'|format(item.ear) if item.ear is not none else '--' }}</td><td>{{ '%.3f'|format(item.mar) if item.mar is not none else '--' }}</td><td>{{ item.created_at }}</td><td>{% if item.snapshot_path %}<a href="/api/features/evidence/{{ item.id }}/image" target="_blank"><img class="evidence" src="/api/features/evidence/{{ item.id }}/image" alt="Ảnh minh chứng"></a>{% else %}--{% endif %}</td></tr>{% else %}<tr><td colspan="7" class="empty">Phiên này chưa có cảnh báo.</td></tr>{% endfor %}
+  </tbody></table></div>
+  <p style="color:var(--muted);margin-top:18px">Báo cáo được tạo từ dữ liệu ghi nhận cục bộ của DriveGuard AI. Kết quả có tính chất hỗ trợ giám sát, không thay thế quyết định an toàn của người lái.</p>
+</div>
+</body></html>
