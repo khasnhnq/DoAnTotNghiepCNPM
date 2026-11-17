@@ -52,3 +52,12 @@ debug/
 .driveguard_feature_backups/
 # Alert evidence contains camera images
 static/evidence/
+
+# Local backup files
+*_before_*.py
+*_before_*.html
+*_before_*.css
+*.backup.py
+*.backup.html
+*.backup.css
+*.backup.js
